@@ -1,5 +1,6 @@
 import java.util.*;
 import java.io.*;
+import java.lang.Math;
 
 
 class PageRank{
@@ -141,7 +142,7 @@ class PageRank{
     }
 
     // Returns an Nx1 matrix that results from the sum of two Nx1 matrices m1 and m2
-    private int [] = matrix_addition(int[] m1, int [] m2){
+    private int [] matrix_addition(int[] m1, int [] m2){
         int [] m = new int [N];
         for(int i = 0; i < N; i++){
             m[i] = m1[i] + m2[i];
@@ -149,6 +150,29 @@ class PageRank{
         return m;
     }
     
+    // Returns an Nx1 matrix from the subtraction of Rt from Rt_next (Rt_next - Rt) both of which are Nx1 matrices
+    private double[] subtractMatrices(double [] Rt_next, double [] Rt){
+
+        double [] res = new double [N];
+        for(int i = 0; i < N; i++){
+            res[i] = Math.abs(Rt_next[i] - Rt[i]);
+        }
+        return res;
+    }
+
+
+
+    // Not sure how this function should work yet.
+    /*
+        I need to ask Dr. Zhang about the convergence condition 
+            -> do we check if any of the entries in the resultant Nx1 matrix is less than the value of epsilon or am I missing something
+    */
+    private boolean isConverged(double [] Rt_next, double [] Rt, double epsilon){
+        double res[] = subtractMatrices(Rt_next, Rt);
+
+        return ( < epsilon);
+        
+    }
     
     private void create_m_matrix(){
         return;
@@ -158,7 +182,8 @@ class PageRank{
     }
 
     public void runPageRank(){
-
+        int epsilon = -1;
+        // double Rt_next = 0, Rt = 0;
 
         while(! (Math.abs(Rt_next - Rt) < epsilon)){
 
