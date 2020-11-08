@@ -130,6 +130,26 @@ class PageRank{
         return res;
     }
 
+    // Multiples d by the Nx1 matrix that results from multiplying matrix M (NxN) by matrix R(t) (Nx1)
+    // Returns the product
+    private int [] mult_constant_by_Nx1_matrix(int d, int [] matrix){
+        for(int i = 0; i < N; i++){
+            matrix[i] = matrix[i] * d;
+        }
+
+        return matrix;
+    }
+
+    // Returns an Nx1 matrix that results from the sum of two Nx1 matrices m1 and m2
+    private int [] = matrix_addition(int[] m1, int [] m2){
+        int [] m = new int [N];
+        for(int i = 0; i < N; i++){
+            m[i] = m1[i] + m2[i];
+        }
+        return m;
+    }
+    
+    
     private void create_m_matrix(){
         return;
     }
