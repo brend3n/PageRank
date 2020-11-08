@@ -89,7 +89,6 @@ class PageRank{
             System.out.println("Error in: (" + filename +")\n Exception: " + f);
         }
 
-
     }
 
     // Appends the input string (input) to the output file (filename)
@@ -165,12 +164,13 @@ class PageRank{
     // Not sure how this function should work yet.
     /*
         I need to ask Dr. Zhang about the convergence condition 
-            -> do we check if any of the entries in the resultant Nx1 matrix is less than the value of epsilon or am I missing something
+            -> do we check if any of the entries in the resultant Nx1 matrix is less than the value of epsilon or am I missing
     */
     private boolean isConverged(double [] Rt_next, double [] Rt, double epsilon){
         double res[] = subtractMatrices(Rt_next, Rt);
 
-        return ( < epsilon);
+        // return ( < epsilon);
+        return true;
         
     }
     
@@ -185,9 +185,9 @@ class PageRank{
         int epsilon = -1;
         // double Rt_next = 0, Rt = 0;
 
-        while(! (Math.abs(Rt_next - Rt) < epsilon)){
+        // while(! (Math.abs(Rt_next - Rt) < epsilon)){
 
-        }
+        // }
 
         return;
     }
