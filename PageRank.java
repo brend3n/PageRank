@@ -13,7 +13,11 @@ class PageRank{
 	int graph_size;
 
 	// 2D array to store the input file
-	int [][] matrix;
+    int [][] matrix;
+    
+    double [] R;
+    double [] S;
+    double [][] M;
 
 	// Constuctor
 	public PageRank (String fileName, int numVertices) throws Exception{
@@ -26,10 +30,14 @@ class PageRank{
 		this.N = numVertices;
 
 		// Declaring a 2-D  integer array to act as the adjacency matrix
-		matrix = new int[numVertices][numVertices];
-
+        matrix = new int[numVertices][numVertices];
         
 
+        // Array of page ranks for each node
+        R = new double [N];
+
+        // Array of the M matrix
+        // M = new double[N][N];
 
 		// Reading in the text file and creating the matrix
 		for (int i = 0; i < N; i++){
@@ -131,7 +139,7 @@ class PageRank{
 
     // Multiples d by the Nx1 matrix that results from multiplying matrix M (NxN) by matrix R(t) (Nx1)
     // Returns the product
-    private double [] mult_constant_by_Nx1_matrix(int d, double [] matrix){
+    private double [] mult_constant_by_Nx1_matrix(double d, double [] matrix){
         for(int i = 0; i < N; i++){
             matrix[i] = matrix[i] * d;
         }
@@ -181,22 +189,22 @@ class PageRank{
         double [][] matrix_m = new double[N][N];
         int [] links = L_arr();
 
-        System.out.println("L_arr: " + Arrays.toString(links));
+        // System.out.println("L_arr: " + Arrays.toString(links));
 
         for(int i = 0; i < N; i++)
             for(int j = 0; j < N; j++){
                 if(matrix[i][j] == 1){
-                    System.out.printf("%c->%c == 1\n", (i + 65), (j +65));
+                    // System.out.printf("%c->%c == 1\n", (i + 65), (j +65));
                     // System.out.printf("\t Setting matrix_m[%c][%c] = %lf\n",i+65, j+65, (double)(1.0/links[i]));
                     matrix_m[j][i] = (double)(1.0/links[i]);
                 }
                 else{
-                    System.out.println("ELSE");
-                    System.out.printf("%c->%c == 0\n", (i + 65), (j + 65));
-                    System.out.printf("\t Setting matrix_m[%c][%c] = %d\n",i+65, j+65, 0);
+                    // System.out.println("ELSE");
+                    // System.out.printf("%c->%c == 0\n", (i + 65), (j + 65));
+                    // System.out.printf("\t Setting matrix_m[%c][%c] = %d\n",i+65, j+65, 0);
                     matrix_m[j][i] = 0;
                 }
-                System.out.println();
+                // System.out.println();
             }
 
         return matrix_m;
@@ -228,11 +236,42 @@ class PageRank{
         
     }
     
-    public void runPageRank(double damping, double ep){
+    private void init_for_runPageRank(double damping){
+
+        // Initialize page ranks for all nodes
+        Arrays.fill(R, (double)1/N);
 
         // Nx1 vector that consists of the entry (1-d)/N
-        double[] S = create_s_matrix(create_s_matrix_entry(damping));
-        
+        S = create_s_matrix(create_s_matrix_entry(damping));
+
+        // Create M matrix
+        M = create_m_matrix();
+
+        System.out.println("R: ");
+        System.out.println(Arrays.toString(R));
+
+        System.out.println("S: ");
+        System.out.println(Arrays.toString(S));
+        System.out.println("M: ");
+        print2d(M);
+
+    }
+    public void runPageRank(double damping, double ep){
+
+        double [] G;
+        double [] F;
+        init_for_runPageRank(damping);
+
+        System.out.println("0");
+        System.out.print(Arrays.toString(R));
+        G = matrix_mult_MxR(M, R);
+        F = mult_constant_by_Nx1_matrix(damping, G);
+        R = matrix_addition(S, F);
+
+
+        System.out.println("1");
+        System.out.print(Arrays.toString(R));
+    
 
 
 
@@ -260,10 +299,13 @@ class PageRank{
 
             PageRank pr = new PageRank(fileName , numberOfVertices);
 
-            System.out.println("hehehe");
-            pr.print2d(pr.matrix);
-            double [][] arr = pr.create_m_matrix();
-            pr.print2d(arr);
+            // System.out.println("hehehe");
+            // pr.print2d(pr.matrix);
+            // double [][] arr = pr.create_m_matrix();
+            // pr.print2d(arr);
+           double damping = 0.75;
+            int ep = 1;
+            pr.runPageRank(damping, ep);
     
             
            
