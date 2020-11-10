@@ -18,7 +18,7 @@ class PageRank{
 	// Constuctor
 	public PageRank (String fileName, int numVertices) throws Exception{
 
-
+        
 		// Opens the passed in file and allows the filed to be read
 		Scanner scan = new Scanner(new File(fileName));
 
@@ -28,15 +28,16 @@ class PageRank{
 		// Declaring a 2-D  integer array to act as the adjacency matrix
 		matrix = new int[numVertices][numVertices];
 
-		// Not sure what this is for
-		int [] edgeCount = new int[N];
+        
 
 
 		// Reading in the text file and creating the matrix
 		for (int i = 0; i < N; i++){
 
 			// Reading in the first charater of each row. This represents the number of the row starting at 0.
-			int rowNum = scan.nextInt();
+            int rowNum = scan.nextInt();
+        
+
 
 			// Ignoring the tab
 			scan.skip("\t");
@@ -53,18 +54,16 @@ class PageRank{
 
 			// Reading each edge in the text file and adding it to the adjacency matrix
 			for (int j = 0; j < N; j++){
-				if(strScan.hasNextInt())
-				    matrix[i][j] = strScan.nextInt();
-				else
-				    strScan.skip(" ");
+				if(strScan.hasNextInt()){
+                    matrix[i][j] = strScan.nextInt();
+                }
+				else{
+                    strScan.skip(" ");
+                }
             }
-            
-            // Closing scanner object
-            strScan.close();
         }
 
         // printArr(matrix);
-
     }
 
     // Prints a 2D array for testing purposes
@@ -159,6 +158,61 @@ class PageRank{
         return res;
     }
 
+    private int get_outgoing_links(int node){
+        int rowSum = 0;
+
+        for(int i = 0; i < N; i++){
+            if(matrix[node][i] == 1)
+                rowSum++;
+        }
+
+        return rowSum;
+    }
+
+    private int[] L_arr(){
+        int [] arr = new int [N];
+        for(int i = 0; i < N; i++){
+            arr[i] = get_outgoing_links(i);
+        }
+        return arr;
+    }
+    
+    private double [][] create_m_matrix(){
+        double [][] matrix_m = new double[N][N];
+        int [] links = L_arr();
+
+        System.out.println("L_arr: " + Arrays.toString(links));
+
+        for(int i = 0; i < N; i++)
+            for(int j = 0; j < N; j++){
+                if(matrix[i][j] == 1){
+                    System.out.printf("%c->%c == 1\n", (i + 65), (j +65));
+                    // System.out.printf("\t Setting matrix_m[%c][%c] = %lf\n",i+65, j+65, (double)(1.0/links[i]));
+                    matrix_m[j][i] = (double)(1.0/links[i]);
+                }
+                else{
+                    System.out.println("ELSE");
+                    System.out.printf("%c->%c == 0\n", (i + 65), (j + 65));
+                    System.out.printf("\t Setting matrix_m[%c][%c] = %d\n",i+65, j+65, 0);
+                    matrix_m[j][i] = 0;
+                }
+                System.out.println();
+            }
+
+        return matrix_m;
+    }
+
+    private void print2d(int [][]arr){
+        for(int i =0; i < N;i++)
+            System.out.println(Arrays.toString(arr[i]));
+        return;
+    }
+    private void print2d(double [][]arr){
+        for(int i =0; i < N;i++)
+            System.out.println(Arrays.toString(arr[i]));
+        return;
+    }
+
 
 
     // Not sure how this function should work yet.
@@ -172,10 +226,6 @@ class PageRank{
         // return ( < epsilon);
         return true;
         
-    }
-    
-    private void create_m_matrix(){
-        return;
     }
     
     public void runPageRank(double damping, double ep){
@@ -203,15 +253,22 @@ class PageRank{
 		}else{
 
 			String fileName = args[0];
-			int numberOfVertices = Integer.parseInt(args[1]);
-
+            int numberOfVertices = Integer.parseInt(args[1]);
+            
+        
             System.out.printf("file name => %s \tnumber of vertices => %d\n", fileName, numberOfVertices);
 
-			PageRank pr = new PageRank(fileName , numberOfVertices);
-			pr.runPageRank(10.0, 24.0);
+            PageRank pr = new PageRank(fileName , numberOfVertices);
+
+            System.out.println("hehehe");
+            pr.print2d(pr.matrix);
+            double [][] arr = pr.create_m_matrix();
+            pr.print2d(arr);
+    
+            
+           
+			// pr.runPageRank(10.0, 24.0);
 		}
-
-
 
         return;
     }
