@@ -244,7 +244,9 @@ class PageRank{
     */
     private boolean isConverged(double [] Rt_next, double [] Rt, double epsilon){
         double res = computeConvergenceCriteria(Rt_next, Rt);
-        return ( res < epsilon);
+
+        return true;
+        // return ( res < epsilon);
     }
     
     private void init_for_runPageRank(double damping){
@@ -275,26 +277,30 @@ class PageRank{
     }
     public void runPageRank(double damping, double ep){
         int iteration = 0;
+        int i = 0;
         double [] G;
         double [] F;
-        double [] R_next;
+        double [] R_next = new double [N];
         init_for_runPageRank(damping);
         R_next = R;
+        // Arrays.fill(R_next, 0.0);
 
-        // print("iteration: ");
-        // print(iteration);
-        // System.out.print(Arrays.toString(R));
+        print("iteration: ");
+        print(iteration);
+        System.out.print(Arrays.toString(R));
 
         do{
             print("brenden");
             G = matrix_mult_MxR(M, R);
             F = mult_constant_by_Nx1_matrix(damping, G);
             R = matrix_addition(S, F);
-
-            // print("iteration: ");
-            // print(++iteration);
-            // System.out.print(Arrays.toString(R));
-        }while(isConverged(R_next,R,ep));
+            // R = R_next;/
+            print("iteration: ");
+            print(++iteration);
+            System.out.println(Arrays.toString(R));
+            print("\n");
+        }while(i++ < 10);
+        // }while(isConverged(R_next,R,ep));
     
 
         print("iteration: ");
