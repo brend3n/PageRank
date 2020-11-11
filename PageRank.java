@@ -19,6 +19,9 @@ class PageRank{
     double [] S;
     double [][] M;
 
+    
+    double currSum = 0.0;
+
 	// Constuctor
 	public PageRank (String fileName, int numVertices) throws Exception{
 
@@ -227,10 +230,12 @@ class PageRank{
         double sum_t = 0;
 
         for(int i = 0; i < N; i++){
-            sum_t += Rt_next[i];
-            sum_t_next += Rt[i];
+            sum_t_next += Rt_next[i];
+            sum_t += Rt[i];
         }
-        summationDiff = sum_t_next - sum_t;
+        
+        summationDiff = Math.abs(sum_t_next - sum_t);
+        System.out.println(summationDiff + " = |" + sum_t_next +" - " + sum_t+"|");
     
         return summationDiff;
     }
@@ -242,11 +247,15 @@ class PageRank{
         I need to ask Dr. Zhang about the convergence condition 
             -> do we check if any of the entries in the resultant Nx1 matrix is less than the value of epsilon or am I missing
     */
-    private boolean isConverged(double [] Rt_next, double [] Rt, double epsilon){
+    private boolean isConverged(double [] Rt_next, double [] Rt, double epsilon, double currSum){
         double res = computeConvergenceCriteria(Rt_next, Rt);
 
-        return true;
-        // return ( res < epsilon);
+        System.out.println("Comparing " + res +" with " + epsilon);
+        System.out.println("Difference: " + res + " Target: " + epsilon);
+        System.out.println("Result: " + (res < epsilon));
+
+        // return true;
+        return ( res < epsilon);
     }
     
     private void init_for_runPageRank(double damping){
@@ -265,8 +274,8 @@ class PageRank{
 
         // System.out.println("S: ");
         // System.out.println(Arrays.toString(S));
-        System.out.println("M: ");
-        print2d(M);
+        // System.out.println("M: ");
+        // print2d(M);
 
     }
     public void print(String str){
@@ -282,29 +291,66 @@ class PageRank{
         double [] F;
         double [] R_next = new double [N];
         init_for_runPageRank(damping);
-        R_next = R;
+        // R_next = R;
         // Arrays.fill(R_next, 0.0);
 
         print("iteration: ");
         print(iteration);
-        System.out.print(Arrays.toString(R));
+        System.out.println(Arrays.toString(R));
 
+        
         do{
-            print("brenden");
+
+            
             G = matrix_mult_MxR(M, R);
             F = mult_constant_by_Nx1_matrix(damping, G);
-            R = matrix_addition(S, F);
-            // R = R_next;/
+            R_next = matrix_addition(S, F);
+
+            if(isConverged(R_next, R, ep, currSum)){
+                break;
+            }
+
+            R = R_next;
             print("iteration: ");
             print(++iteration);
-            System.out.println(Arrays.toString(R));
+            System.out.println("\nR: "+Arrays.toString(R));
             print("\n");
-        }while(i++ < 10);
-        // }while(isConverged(R_next,R,ep));
-    
+        }while(true);
+        // }while(!isConverged(R_next,R,ep));
 
-        print("iteration: ");
-        print(++iteration);
+        // while(i++<100){
+        //     G = matrix_mult_MxR(M, R);
+        //     F = mult_constant_by_Nx1_matrix(damping, G);
+        //     R_next = matrix_addition(S, F);
+        //     // R_next = R;
+        //     print("iteration: ");
+        //     print(++iteration);
+        //     System.out.println("\nR: "+Arrays.toString(R));
+        //     print("\n");
+
+        //     if(isConverged(R_next,R,ep)){
+        //         print("Converged at ");
+        //         print(iteration);
+        //         System.out.println("\nR: "+Arrays.toString(R));
+        //         print("\n");
+        //         break;
+        //     }
+        //     R = R_next;
+
+        // }
+        
+
+        // // while(!isConverged(R_next,R,ep)){
+        //     G = matrix_mult_MxR(M, R);
+        //     F = mult_constant_by_Nx1_matrix(damping, G);
+        //     R_next = matrix_addition(S, F);
+        //     R = R_next;
+        //     print("iteration: ");
+        //     print(++iteration);
+        //     System.out.println("\nR: "+Arrays.toString(R));
+        //     print("\n");
+        // // }
+    
 
 
 
@@ -337,7 +383,8 @@ class PageRank{
             // double [][] arr = pr.create_m_matrix();
             // pr.print2d(arr);
            double damping = 0.75;
-            int ep = 1;
+            // double damping = 0.89;
+            double ep = 1e-5;
             pr.runPageRank(damping, ep);
     
             
