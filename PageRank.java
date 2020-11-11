@@ -1,6 +1,7 @@
 import java.util.*;
 import java.io.*;
 import java.lang.Math;
+import java.lang.Integer;
 
 
 class PageRank{
@@ -18,8 +19,9 @@ class PageRank{
     double [] R;
     double [] S;
     double [][] M;
+    int [] pageOrder;
 
-    
+
     double currSum = 0.0;
 
 	// Constuctor
@@ -229,15 +231,22 @@ class PageRank{
         double sum_t_next = 0;
         double sum_t = 0;
 
+        double diffSum = 0.0;
+
         for(int i = 0; i < N; i++){
             sum_t_next += Rt_next[i];
             sum_t += Rt[i];
         }
+
+        for(int i = 0; i < N; i++){
+            diffSum += Math.abs(Rt_next[i] - Rt[i]);
+        }
         
-        summationDiff = Math.abs(sum_t_next - sum_t);
-        System.out.println(summationDiff + " = |" + sum_t_next +" - " + sum_t+"|");
+        // summationDiff = Math.abs(sum_t_next - sum_t);
+        // System.out.println(summationDiff + " = |" + sum_t_next +" - " + sum_t+"|");
     
-        return summationDiff;
+        // return summationDiff;
+        return diffSum;
     }
 
 
@@ -307,6 +316,7 @@ class PageRank{
             R_next = matrix_addition(S, F);
 
             if(isConverged(R_next, R, ep, currSum)){
+                R = R_next;
                 break;
             }
 
@@ -316,6 +326,9 @@ class PageRank{
             System.out.println("\nR: "+Arrays.toString(R));
             print("\n");
         }while(true);
+
+        terminate();
+
         // }while(!isConverged(R_next,R,ep));
 
         // while(i++<100){
@@ -350,11 +363,21 @@ class PageRank{
         //     System.out.println("\nR: "+Arrays.toString(R));
         //     print("\n");
         // // }
-    
-
 
 
         return;
+    }
+
+    private void terminate() {
+        // Convert R -> Map with key-value where key is the index and the value is the PageRank Value
+        
+        // Sort by PageRank Values
+        // Format string
+        // Output to file
+
+
+        
+
     }
 
     public static void main(String[] args) throws Exception {
@@ -382,8 +405,8 @@ class PageRank{
             // pr.print2d(pr.matrix);
             // double [][] arr = pr.create_m_matrix();
             // pr.print2d(arr);
-           double damping = 0.75;
-            // double damping = 0.89;
+        //    double damping = 0.75;
+            double damping = 0.89;
             double ep = 1e-5;
             pr.runPageRank(damping, ep);
     
