@@ -1,7 +1,10 @@
-import java.util.*;
-import java.io.*;
-import java.lang.Math;
-import java.lang.Integer;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 
 class PageRank{
@@ -22,6 +25,19 @@ class PageRank{
     int [] pageOrder;
 
 
+
+
+    double [] pr1 = new double [N];
+    int [] order1 = new int [N];
+
+    double [] pr2 = new double [N];
+    int [] order2 = new int [N];
+
+    int iterations = 0;
+    int [] ordering;
+    double [] sortedPageRanks;
+    String filename;
+
     double currSum = 0.0;
 
 	// Constuctor
@@ -29,7 +45,8 @@ class PageRank{
 
         
 		// Opens the passed in file and allows the filed to be read
-		Scanner scan = new Scanner(new File(fileName));
+        Scanner scan = new Scanner(new File(fileName));
+        this.filename = "output.txt";
 
 		// Storing the number of vertices/nodes in the graph
 		this.N = numVertices;
@@ -227,26 +244,35 @@ class PageRank{
     }
 
     private double computeConvergenceCriteria(double [] Rt_next, double [] Rt){
-        double summationDiff = 0;
-        double sum_t_next = 0;
-        double sum_t = 0;
+        // double summationDiff = 0;
+        // double sum_t_next = 0;
+        // double sum_t = 0;
 
         double diffSum = 0.0;
 
-        for(int i = 0; i < N; i++){
-            sum_t_next += Rt_next[i];
-            sum_t += Rt[i];
-        }
+        // for(int i = 0; i < N; i++){
+        //     sum_t_next += Rt_next[i];
+        //     sum_t += Rt[i];
+        // }
+
+        // summationDiff = Math.abs(sum_t_next - sum_t);
+        // System.out.println(summationDiff + " = |" + sum_t_next +" - " + sum_t+"|");
+        // return summationDiff;
+
+        
+
+
 
         for(int i = 0; i < N; i++){
             diffSum += Math.abs(Rt_next[i] - Rt[i]);
         }
-        
-        // summationDiff = Math.abs(sum_t_next - sum_t);
-        // System.out.println(summationDiff + " = |" + sum_t_next +" - " + sum_t+"|");
-    
-        // return summationDiff;
+
+        System.out.println("diffSum = " + diffSum);
         return diffSum;
+
+
+
+    //    return 420.0;
     }
 
 
@@ -256,15 +282,16 @@ class PageRank{
         I need to ask Dr. Zhang about the convergence condition 
             -> do we check if any of the entries in the resultant Nx1 matrix is less than the value of epsilon or am I missing
     */
-    private boolean isConverged(double [] Rt_next, double [] Rt, double epsilon, double currSum){
+    private double isConverged(double [] Rt_next, double [] Rt, double epsilon, double currSum){
         double res = computeConvergenceCriteria(Rt_next, Rt);
+        // boolean res = false;
 
-        System.out.println("Comparing " + res +" with " + epsilon);
-        System.out.println("Difference: " + res + " Target: " + epsilon);
-        System.out.println("Result: " + (res < epsilon));
+        // System.out.printf("res: %lf\nepsilon: %lf\nDifference: %lf", res, epsilon, (res - epsilon));
+        System.out.printf("Convergence reached: %s\n", (res < epsilon) ? "true":"false");
+
 
         // return true;
-        return ( res < epsilon);
+        return res;
     }
     
     private void init_for_runPageRank(double damping){
@@ -294,7 +321,7 @@ class PageRank{
         System.out.print(str);
     }
     public void runPageRank(double damping, double ep){
-        int iteration = 0;
+        
         int i = 0;
         double [] G;
         double [] F;
@@ -303,89 +330,148 @@ class PageRank{
         // R_next = R;
         // Arrays.fill(R_next, 0.0);
 
-        print("iteration: ");
-        print(iteration);
+        print("iterations: ");
+        print(iterations);
         System.out.println(Arrays.toString(R));
 
         
         do{
-
-            
+            // print("iterations: ");
+            iterations++;
+            // System.out.println("\nR: "+Arrays.toString(R));
             G = matrix_mult_MxR(M, R);
             F = mult_constant_by_Nx1_matrix(damping, G);
             R_next = matrix_addition(S, F);
 
-            if(isConverged(R_next, R, ep, currSum)){
+            if(isConverged(R_next, R, ep, currSum) <  ep){
+                System.out.println("Converged at iterations: " + iterations);
                 R = R_next;
                 break;
             }
 
             R = R_next;
-            print("iteration: ");
-            print(++iteration);
-            System.out.println("\nR: "+Arrays.toString(R));
-            print("\n");
         }while(true);
 
-        terminate();
+       pr1 =  terminate();
 
         // }while(!isConverged(R_next,R,ep));
 
-        // while(i++<100){
-        //     G = matrix_mult_MxR(M, R);
-        //     F = mult_constant_by_Nx1_matrix(damping, G);
-        //     R_next = matrix_addition(S, F);
-        //     // R_next = R;
-        //     print("iteration: ");
-        //     print(++iteration);
-        //     System.out.println("\nR: "+Arrays.toString(R));
-        //     print("\n");
+        while(i++<1e6){
+            G = matrix_mult_MxR(M, R);
+            F = mult_constant_by_Nx1_matrix(damping, G);
+            R_next = matrix_addition(S, F);
+            // iterations++;
+            // if(iterations % 1000000 == 0)
+                // System.out.println(iterations);
+            // R_next = R;
+            // print("iterations: ");
+            // print(++iterations);
+            // print("\n");
+            // System.out.println("\nR: "+Arrays.toString(R));
+            // System.out.println("\nR_next: "+Arrays.toString(R_next));
+            // System.out.println("Math.abs(sum(R_next - R)) = "+ computeConvergenceCriteria(R_next, R));
+            // print("\n");
 
-        //     if(isConverged(R_next,R,ep)){
-        //         print("Converged at ");
-        //         print(iteration);
-        //         System.out.println("\nR: "+Arrays.toString(R));
-        //         print("\n");
-        //         break;
-        //     }
-        //     R = R_next;
+            // if(isConverged(R_next,R,ep, currSum) < ep ){
+            //     System.out.println("Converged at iterations: " + iterations);
+            //     break;
+            // }
+            R = R_next;
 
-        // }
+        }
+         pr2 = terminate();
         
+
+        int flag = 1;
+         for(i = 0; i < N; i++){
+             if(Math.abs(pr1[i] - pr2[i]) > 1e-5){
+                System.out.println("NOT CONVERGED ENOUGH");
+                flag = 0;
+                break;
+             }
+            System.out.println("Math.abs(" +pr1[i]+ "-" +pr2[i]+" = " + (Math.abs(pr1[i] - pr2[i])));
+         }
+
+         if(flag == 1)
+            System.out.println("CONVERGED");
 
         // // while(!isConverged(R_next,R,ep)){
         //     G = matrix_mult_MxR(M, R);
         //     F = mult_constant_by_Nx1_matrix(damping, G);
         //     R_next = matrix_addition(S, F);
         //     R = R_next;
-        //     print("iteration: ");
-        //     print(++iteration);
+        //     print("iterations: ");
+        //     print(++iterations);
         //     System.out.println("\nR: "+Arrays.toString(R));
         //     print("\n");
         // // }
 
 
+
         return;
     }
 
-    private void terminate() {
+    private double[] terminate() {
         // Convert R -> Map with key-value where key is the index and the value is the PageRank Value
-        
-        // Sort by PageRank Values
-        // Format string
-        // Output to file
+        Map <Double, Integer> RankMap = new HashMap<Double, Integer>(N);
+        ordering = new int[N];
+        double val;
+        for(int i = 0; i < N ; i++){
 
+//                            key          value
+            // Mapping : {index of array, PageRank }
+            RankMap.put(R[i], i);
+            System.out.println(i +": " + R[i]);
+        }
 
+        sortedPageRanks = R;
+        Arrays.sort(sortedPageRanks);
+        System.out.println(RankMap.toString());
+
+        for(int i = 0; i < N; i++){
+            ordering[i] = RankMap.get(sortedPageRanks[i]);
+        }
+            print("\n\n|Ordering|\n\n");
+            System.out.println(Arrays.toString(ordering));
+            
         
+        double max = -1e9;
+        double min = 1e9; ;    
+        
+        for(int i = 0; i < N ;i++){
+            val = sortedPageRanks[i];
+            if(val < min){min = val; continue;}
+            if(val > max){max = val; continue;}
+
+        }
+        System.out.printf("Min: "+min+"\t"+" Max:" +max+ "\n");
+
+        print_to_file(R);
+        
+        return sortedPageRanks;
 
     }
 
+    private void print_to_file(double [] R){
+        String end = "", res_str = "";
+
+        writeToFile(filename, "number of iterations: " + iterations );
+
+        int j = N-1;
+        for(int i = 0; i < N; i++){
+            if(i == (N-1)){
+                end = ".";
+            }else{
+                end = ", ";
+            }
+            res_str += ordering[i] + " (" + sortedPageRanks[j--]+")"+ end;    
+        }
+        appendToFile(filename, res_str);
+        // writeToFile(filename, input);
+        // appendToFile(filename, input);
+    }
+
     public static void main(String[] args) throws Exception {
-
-        // The damping factor d is equal to the score of your second exam divided by 100. ε is equal to 1e-5.
-        // d = 89/100 = 0.89
-        // ε = 1e-5 = 0.00001
-
         if (args.length < 2 || args.length > 2 ){
 			System.out.println("To run this program: ");
 			// System.out.println("\t javac FleuryPrimSolver [filename] [source] [number of vertices in graph] ");
@@ -396,23 +482,13 @@ class PageRank{
 			String fileName = args[0];
             int numberOfVertices = Integer.parseInt(args[1]);
             
-        
-            System.out.printf("file name => %s \tnumber of vertices => %d\n", fileName, numberOfVertices);
-
             PageRank pr = new PageRank(fileName , numberOfVertices);
-
-            // System.out.println("hehehe");
-            // pr.print2d(pr.matrix);
-            // double [][] arr = pr.create_m_matrix();
-            // pr.print2d(arr);
-        //    double damping = 0.75;
+            // The damping factor d is equal to the score of your second exam divided by 100. ε is equal to 1e-5.
+                // d = 89/100 = 0.89
+                // ε = 1e-5 = 0.00001
             double damping = 0.89;
             double ep = 1e-5;
             pr.runPageRank(damping, ep);
-    
-            
-           
-			// pr.runPageRank(10.0, 24.0);
 		}
 
         return;
