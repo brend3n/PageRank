@@ -1,5 +1,9 @@
-Unsure whether the results of the algorithm implemented works, I planned to evaluate that the convergence of this algorithm is met correctly. To test this, I ran my algorithm 
-and stored the results in an array and ran the diagnostics after it ran. The diagnostics give information such as the number of iterations, the PageRanks of each page,
+Unsure whether the results of the algorithm are valia, I planned to evaluate the convergence of this algorithm to test its correctness. I am testing this algorithm by running it on two in two different scenarios. 
+
+
+
+First, I run the algorithm 
+and stored the results in an array. The diagnostics give information such as the number of iterations, the PageRanks of each page,
 and the ordering of the pages from largest PageRank to smallest PageRank. I then ran the algorithm again without the check for convergence for 1e6 iterations. Again, the program 
 spit out the diagnositcs for this test run. I then compared the values from each test to see if there was any difference in the ordering of the PageRanks and the values
 of the PageRanks. Upon observation, the ordering of the pages are the same, however, the PageRanks of each page slightly vary. I took the absolute difference of 
