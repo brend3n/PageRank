@@ -16,7 +16,7 @@
 
 ###	2. Run the following command:
 			
-#               `java -jar PageRank.jar [filename of graph] [number of vertices in graph]`
+#####               `java -jar PageRank.jar [filename of graph] [number of vertices in graph]`
 
 ### The input file should be a square adjancency matrix of integers separated by commas. A '0' represents no edge between two nodes.
 ### Additionally, the leftmost character of each row should be an integer representing the row. After, this character should be a '\t' tab character.
@@ -32,8 +32,8 @@
 ### The program outputs the nodes in order of highest PageRank to lowest PageRank to a file called "output.txt"
 ### The format of the output file is:
 
-# `number of iterations: 20`
-# `ranking: 36 (0.0108), 87 (0.0102), 12 (0.00854), ..., 56 (0.00278).`
+#### `number of iterations: 20`
+#### `ranking: 36 (0.0108), 87 (0.0102), 12 (0.00854), ..., 56 (0.00278).`
 
 
 ## Thank you for using this program!!
