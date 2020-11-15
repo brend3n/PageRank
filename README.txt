@@ -1,8 +1,8 @@
-# PageRank
+### PageRank
 
-# Author: Brenden Morton
-# Course: Network Optimization
-# Professor: Dr. Wei Zhang
+## Author: Brenden Morton
+## Course: Network Optimization
+## Professor: Dr. Wei Zhang
 
 
 
