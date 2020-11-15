@@ -19,26 +19,29 @@ class PageRank{
 	// 2D array to store the input file
     int [][] matrix;
     
-    double [] R;
-    double [] S;
-    double [][] M;
-    int [] pageOrder;
-
-
-
-
-    double [] pr1 = new double [N];
-    int [] order1 = new int [N];
-
-    double [] pr2 = new double [N];
-    int [] order2 = new int [N];
-
-    int iterations = 0;
-    int [] ordering;
-    double [] sortedPageRanks;
+    // Stores the name of the file that we read the Adjacency matrix from
     String filename;
 
-    double currSum = 0.0;
+    // Stores the current iteration of the PageRank values of all of the N pages
+    double [] R;
+
+    // Stores the Nx1 vector of (1-d)/N, where d is the damping factor and N is the number of nodes/pages being observed
+    double [] S;
+
+    // Stores the NxN stochastic matrix that contains the 1/L(pj) if some page j links to page i , where L is the number of outgoing links from page j
+    double [][] M;
+
+    // Used for processing the output
+    double [] pr1 = new double [N];
+
+    // Initially stores a copy of the vector R, but then is sorted based on PageRank from highest to lowest
+    double [] sortedPageRanks;
+    
+    // Stores the order of the of the nodes based on PageRank
+    int [] ordering;
+
+    // The number of iterations the algorithm ran for
+    int iterations = 0;
 
 	// Constuctor
 	public PageRank (String fileName, int numVertices) throws Exception{
@@ -54,12 +57,9 @@ class PageRank{
 		// Declaring a 2-D  integer array to act as the adjacency matrix
         matrix = new int[numVertices][numVertices];
         
-
         // Array of page ranks for each node
         R = new double [N];
 
-        // Array of the M matrix
-        // M = new double[N][N];
 
 		// Reading in the text file and creating the matrix
 		for (int i = 0; i < N; i++){
@@ -67,8 +67,6 @@ class PageRank{
 			// Reading in the first charater of each row. This represents the number of the row starting at 0.
             int rowNum = scan.nextInt();
         
-
-
 			// Ignoring the tab
 			scan.skip("\t");
 
@@ -84,25 +82,11 @@ class PageRank{
 
 			// Reading each edge in the text file and adding it to the adjacency matrix
 			for (int j = 0; j < N; j++){
-				if(strScan.hasNextInt()){
-                    matrix[i][j] = strScan.nextInt();
-                }
-				else{
+				if(strScan.hasNextInt())
+                    matrix[i][j] = strScan.nextInt();            
+				else
                     strScan.skip(" ");
-                }
             }
-        }
-
-        // printArr(matrix);
-    }
-
-    // Prints a 2D array for testing purposes
-    private void printArr(int [][] arr){
-        for(int [] x : arr){
-            for(int y : x){
-                System.out.print(y + " ");
-            }
-            System.out.println();
         }
     }
 
@@ -138,21 +122,20 @@ class PageRank{
         return ((1-damping)/N);
     }
 
-    // Creates a Nx1 matrix of the same (entry := entry)
+    // Creates a Nx1 matrix of all the same entry
     private double [] create_s_matrix(double entry){
         double [] S_arr = new double [this.N];
         Arrays.fill(S_arr, entry);
         return S_arr;
     }
 
-    // m1 is a NxN matrix and m2 is an Nx1 matrix
-    // This should result in a Nx1 matrix
+    // Stores the result of mulitplying the previous pageRanks by the stochastic matrix M.
+    // See more about what makes up the stochastic matrix M in the top of this program by the declaration of it.
     private double [] matrix_mult_MxR(double [][] m1, double []m2){
         double [] res = new double [N];
         Arrays.fill(res, 0);
         for(int i = 0; i < N; i++){
             for(int j = 0; j < N; j++){
-                // System.out.printf("(m1[%d][%d]) x (m2[%d]) -> %d x %d\n", i,j,i, m1[i][j], m2[i]);
                 res[i] += m1[i][j] * m2[j];
             }
         }
@@ -165,7 +148,6 @@ class PageRank{
         for(int i = 0; i < N; i++){
             matrix[i] = matrix[i] * d;
         }
-
         return matrix;
     }
 
@@ -178,16 +160,7 @@ class PageRank{
         return m;
     }
     
-    // Returns an Nx1 matrix from the subtraction of Rt from Rt_next (Rt_next - Rt) both of which are Nx1 matrices
-    private double[] absolute_matrix_subtraction(double [] Rt_next, double [] Rt){
-
-        double [] res = new double [N];
-        for(int i = 0; i < N; i++){
-            res[i] = Math.abs(Rt_next[i] - Rt[i]);
-        }
-        return res;
-    }
-
+    // Returns the row sum of a single node. The row sum represents the number of outgoing links of a node i.
     private int get_outgoing_links(int node){
         int rowSum = 0;
 
@@ -199,6 +172,7 @@ class PageRank{
         return rowSum;
     }
 
+    // Returns an array of all of the values 1/L(pj) for all nodes j where L(x) is the number of outgoing links of a node x.
     private int[] L_arr(){
         int [] arr = new int [N];
         for(int i = 0; i < N; i++){
@@ -207,93 +181,41 @@ class PageRank{
         return arr;
     }
     
+    // Computes all of the entries of the M (NxN) matrix. Read more about the entries of M at the declaration of M.
     private double [][] create_m_matrix(){
+
         double [][] matrix_m = new double[N][N];
         int [] links = L_arr();
 
-        // System.out.println("L_arr: " + Arrays.toString(links));
-
         for(int i = 0; i < N; i++)
             for(int j = 0; j < N; j++){
-                if(matrix[i][j] == 1){
-                    // System.out.printf("%c->%c == 1\n", (i + 65), (j +65));
-                    // System.out.printf("\t Setting matrix_m[%c][%c] = %lf\n",i+65, j+65, (double)(1.0/links[i]));
-                    matrix_m[j][i] = (double)(1.0/links[i]);
-                }
-                else{
-                    // System.out.println("ELSE");
-                    // System.out.printf("%c->%c == 0\n", (i + 65), (j + 65));
-                    // System.out.printf("\t Setting matrix_m[%c][%c] = %d\n",i+65, j+65, 0);
-                    matrix_m[j][i] = 0;
-                }
-                // System.out.println();
+                if(matrix[i][j] == 1)
+                    matrix_m[j][i] = (double)(1.0/links[i]);        
+                else
+                    matrix_m[j][i] = 0;        
             }
-
         return matrix_m;
     }
 
-    private void print2d(int [][]arr){
-        for(int i =0; i < N;i++)
-            System.out.println(Arrays.toString(arr[i]));
-        return;
-    }
-    private void print2d(double [][]arr){
-        for(int i =0; i < N;i++)
-            System.out.println(Arrays.toString(arr[i]));
-        return;
-    }
-
+    // Returns the sum of all of the absolute differences of the current and the past iterations of PageRanks of each page. 
     private double computeConvergenceCriteria(double [] Rt_next, double [] Rt){
-        // double summationDiff = 0;
-        // double sum_t_next = 0;
-        // double sum_t = 0;
-
         double diffSum = 0.0;
-
-        // for(int i = 0; i < N; i++){
-        //     sum_t_next += Rt_next[i];
-        //     sum_t += Rt[i];
-        // }
-
-        // summationDiff = Math.abs(sum_t_next - sum_t);
-        // System.out.println(summationDiff + " = |" + sum_t_next +" - " + sum_t+"|");
-        // return summationDiff;
-
-        
-
-
 
         for(int i = 0; i < N; i++){
             diffSum += Math.abs(Rt_next[i] - Rt[i]);
         }
 
-        System.out.println("diffSum = " + diffSum);
         return diffSum;
-
-
-
-    //    return 420.0;
     }
 
-
-
-    // Not sure how this function should work yet.
-    /*
-        I need to ask Dr. Zhang about the convergence condition 
-            -> do we check if any of the entries in the resultant Nx1 matrix is less than the value of epsilon or am I missing
-    */
-    private double isConverged(double [] Rt_next, double [] Rt, double epsilon, double currSum){
+    // Returns the computeConvergenceCriteria
+    private double isConverged(double [] Rt_next, double [] Rt, double epsilon){
         double res = computeConvergenceCriteria(Rt_next, Rt);
-        // boolean res = false;
 
-        // System.out.printf("res: %lf\nepsilon: %lf\nDifference: %lf", res, epsilon, (res - epsilon));
-        System.out.printf("Convergence reached: %s\n", (res < epsilon) ? "true":"false");
-
-
-        // return true;
         return res;
     }
     
+    // Initializes the vectors R, M and S for the PageRank algorithm.
     private void init_for_runPageRank(double damping){
 
         // Initialize page ranks for all nodes
@@ -304,47 +226,28 @@ class PageRank{
 
         // Create M matrix
         M = create_m_matrix();
-
-        // System.out.println("R: ");
-        // System.out.println(Arrays.toString(R));
-
-        // System.out.println("S: ");
-        // System.out.println(Arrays.toString(S));
-        // System.out.println("M: ");
-        // print2d(M);
-
+    
     }
-    public void print(String str){
-        System.out.print(str);
-    }
-    public void print(int str){
-        System.out.print(str);
-    }
+    
+    
+    // Runs this implementation of the PageRank algorithm on a specified input matrix with N pages.
+    // In this implementation, the algorithm continues to run until it converges upon a specified value of ε or ep.
     public void runPageRank(double damping, double ep){
-        
-        int i = 0;
         double [] G;
         double [] F;
         double [] R_next = new double [N];
         init_for_runPageRank(damping);
-        // R_next = R;
-        // Arrays.fill(R_next, 0.0);
-
-        print("iterations: ");
-        print(iterations);
-        System.out.println(Arrays.toString(R));
-
         
+        // Loops until the results converge on ε
         do{
-            // print("iterations: ");
             iterations++;
-            // System.out.println("\nR: "+Arrays.toString(R));
+            // Building up the result of a single iteration of PageRank algo
             G = matrix_mult_MxR(M, R);
             F = mult_constant_by_Nx1_matrix(damping, G);
             R_next = matrix_addition(S, F);
 
-            if(isConverged(R_next, R, ep, currSum) <  ep){
-                System.out.println("Converged at iterations: " + iterations);
+            // Check for convergence
+            if(isConverged(R_next, R, ep) <  ep){
                 R = R_next;
                 break;
             }
@@ -352,106 +255,44 @@ class PageRank{
             R = R_next;
         }while(true);
 
-       pr1 =  terminate();
-
-        // }while(!isConverged(R_next,R,ep));
-
-        while(i++<1e6){
-            G = matrix_mult_MxR(M, R);
-            F = mult_constant_by_Nx1_matrix(damping, G);
-            R_next = matrix_addition(S, F);
-            // iterations++;
-            // if(iterations % 1000000 == 0)
-                // System.out.println(iterations);
-            // R_next = R;
-            // print("iterations: ");
-            // print(++iterations);
-            // print("\n");
-            // System.out.println("\nR: "+Arrays.toString(R));
-            // System.out.println("\nR_next: "+Arrays.toString(R_next));
-            // System.out.println("Math.abs(sum(R_next - R)) = "+ computeConvergenceCriteria(R_next, R));
-            // print("\n");
-
-            // if(isConverged(R_next,R,ep, currSum) < ep ){
-            //     System.out.println("Converged at iterations: " + iterations);
-            //     break;
-            // }
-            R = R_next;
-
-        }
-         pr2 = terminate();
-        
-
-        int flag = 1;
-         for(i = 0; i < N; i++){
-             if(Math.abs(pr1[i] - pr2[i]) > 1e-5){
-                System.out.println("NOT CONVERGED ENOUGH");
-                flag = 0;
-                break;
-             }
-            System.out.println("Math.abs(" +pr1[i]+ "-" +pr2[i]+" = " + (Math.abs(pr1[i] - pr2[i])));
-         }
-
-         if(flag == 1)
-            System.out.println("CONVERGED");
-
-        // // while(!isConverged(R_next,R,ep)){
-        //     G = matrix_mult_MxR(M, R);
-        //     F = mult_constant_by_Nx1_matrix(damping, G);
-        //     R_next = matrix_addition(S, F);
-        //     R = R_next;
-        //     print("iterations: ");
-        //     print(++iterations);
-        //     System.out.println("\nR: "+Arrays.toString(R));
-        //     print("\n");
-        // // }
-
-
+        // Used for processing the results
+        pr1 =  terminate();
 
         return;
     }
 
+    // Ends the execution of the program by obtaining the proper
+    // ordering of the pages and writing these results to a file
     private double[] terminate() {
         // Convert R -> Map with key-value where key is the index and the value is the PageRank Value
         Map <Double, Integer> RankMap = new HashMap<Double, Integer>(N);
-        ordering = new int[N];
-        double val;
-        for(int i = 0; i < N ; i++){
 
-//                            key          value
+        // Used to store the order of the pages
+        ordering = new int[N];
+
+        for(int i = 0; i < N ; i++){
+            //                key          value
             // Mapping : {index of array, PageRank }
             RankMap.put(R[i], i);
-            System.out.println(i +": " + R[i]);
         }
 
+        // Make a copy of R and the pageRanks of R
         sortedPageRanks = R;
         Arrays.sort(sortedPageRanks);
-        System.out.println(RankMap.toString());
 
+        // Ordering the pages based on PageRank
         for(int i = 0; i < N; i++){
             ordering[i] = RankMap.get(sortedPageRanks[i]);
-        }
-            print("\n\n|Ordering|\n\n");
-            System.out.println(Arrays.toString(ordering));
-            
-        
-        double max = -1e9;
-        double min = 1e9; ;    
-        
-        for(int i = 0; i < N ;i++){
-            val = sortedPageRanks[i];
-            if(val < min){min = val; continue;}
-            if(val > max){max = val; continue;}
+        }                    
 
-        }
-        System.out.printf("Min: "+min+"\t"+" Max:" +max+ "\n");
+        // Print the results of the algorithm to output.txt in this directory
+        print_to_file(R);    
 
-        print_to_file(R);
-        
         return sortedPageRanks;
-
     }
 
+    // Writes the result of the PageRank algorithm to a file in the order of highest PageRank
+    // to lowest PageRank with their respective page number.
     private void print_to_file(double [] R){
         String end = "", res_str = "";
 
@@ -467,14 +308,11 @@ class PageRank{
             res_str += ordering[i] + " (" + sortedPageRanks[j--]+")"+ end;    
         }
         appendToFile(filename, res_str);
-        // writeToFile(filename, input);
-        // appendToFile(filename, input);
     }
 
     public static void main(String[] args) throws Exception {
         if (args.length < 2 || args.length > 2 ){
 			System.out.println("To run this program: ");
-			// System.out.println("\t javac FleuryPrimSolver [filename] [source] [number of vertices in graph] ");
 			System.out.println("\t java -jar PageRank.jar [filename of graph] [number of vertices in graph] ");
 
 		}else{
@@ -483,14 +321,13 @@ class PageRank{
             int numberOfVertices = Integer.parseInt(args[1]);
             
             PageRank pr = new PageRank(fileName , numberOfVertices);
-            // The damping factor d is equal to the score of your second exam divided by 100. ε is equal to 1e-5.
+            // The damping factor d is equal to the score of the second exam divided by 100. ε is equal to 1e-5.
                 // d = 89/100 = 0.89
                 // ε = 1e-5 = 0.00001
             double damping = 0.89;
             double ep = 1e-5;
             pr.runPageRank(damping, ep);
 		}
-
         return;
     }
 }
